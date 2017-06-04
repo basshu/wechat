@@ -1,0 +1,7 @@
+{
+    "require": {
+        "symfony/var-dumper": "^3.3",
+        "catfan/medoo": "^1.4",
+        "filp/whoops": "^2.1"
+    }
+}
