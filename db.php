@@ -22,7 +22,7 @@ $database = new \Medoo\Medoo([
     ]
 ]);
 
-// dump($database);
+dump($database);
 
-// var_dump($database);
+var_dump($database);
 
