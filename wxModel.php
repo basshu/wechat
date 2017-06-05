@@ -264,8 +264,8 @@ EOT;
         {
             return $_SESSION['access_token'];
         } else {
-            $appid = "wx542c11817c22d123";
-            $appsecret = "8b2d7aac7d5dc87173bc62a429545e18";
+            $appid = "wxc059f3adb5938b6a";
+            $appsecret = "ed6b5cb68e18390318df6c0c2f9dafbd";
 
             $url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=".$appid."&secret=".$appsecret;
             $access_token = $this->jsonToArray($this->getData($url))['access_token'];
