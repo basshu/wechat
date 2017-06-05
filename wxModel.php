@@ -222,8 +222,8 @@ EOT;
 
     /*
      * curl请求，获取返回的数据
-     * */
-    public function getData($url)
+     * */       //默认提交方式
+    public function getData($url, $method='GET', $arr='')
     {
         // 1. cURL初始化
         $ch = curl_init();
@@ -237,6 +237,12 @@ EOT;
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        //post请求
+        if (strtoupper($method) == 'POST'){
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $arr);
+
+        }
 
         // 3. 执行cURL请求
         $ret = curl_exec($ch);
@@ -255,7 +261,13 @@ EOT;
         $arr = json_decode($json, 1);
         return $arr;
     }
+    /**
+    接口调用请求说明
+Token:
+https请求方式: GET
+https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET
 
+    */
     public function getAccessToken(){
         // redis  memcache SESSION
         session_start();
