@@ -148,23 +148,28 @@ EOT;
                     $retStr = sprintf($textTpl, $fromusername, $tousername, $time, $msgtype, $content);
                     echo $retStr;
                 }
-            }
 
-            $time = time();
-            $msgtype = $postObj->MsgType;
-            $content = "欢迎来到微信公众号的开发世界！__GZPHP27";
+                if($event == 'CLICK')
+                {
+                    $key = $postObj->EventKey;//EventKey默认的
 
-            /*
-            <xml>
-            <ToUserName><![CDATA[toUser]]></ToUserName>
-            <FromUserName><![CDATA[fromUser]]></FromUserName>
-            <CreateTime>12345678</CreateTime>
-            <MsgType><![CDATA[text]]></MsgType>
-            <Content><![CDATA[你好]]></Content>
-            </xml>
-            */
-            // 发送消息的xml模板：文本消息
-            $textTpl = "<xml>
+                    switch ($key) {
+                        case '20000':
+                            $content = "你点击的是图文列表";
+                            break;
+                        case '30000':
+                            $content = "你点击的是联系我们";
+                            break;
+                        case '40000':
+                            $content = "你点击的是在线帮助";
+                            break;
+                        
+                        default:
+                            $content = "不存在菜单";
+                            break;
+                    }
+
+                     $textTpl = "<xml>
                             <ToUserName><![CDATA[%s]]></ToUserName>
                             <FromUserName><![CDATA[%s]]></FromUserName>
                             <CreateTime>%s</CreateTime>
@@ -173,11 +178,43 @@ EOT;
                             <FuncFlag>0</FuncFlag>
                             </xml>";
 
+                    $time = time();
+                    $msgtype = 'text';
+                    // $content = "你点击";
+                    $retStr = sprintf($textTpl, $fromusername, $tousername, $time, $msgtype, $content);
+                    echo $retStr;
+                }
+
+
+
+                if (substr($keyword, 0, 6 ) =='天气') {
+
+                    $city = substr($keyword, 6, strlen($keyword));
+                    $str = $this->getWeather($city);
+                    $textTpl = "<xml>
+                            <ToUserName><![CDATA[%s]]></ToUserName>
+                            <FromUserName><![CDATA[%s]]></FromUserName>
+                            <CreateTime>%s</CreateTime>
+                            <MsgType><![CDATA[%s]]></MsgType>
+                            <Content><![CDATA[%s]]></Content>
+                            <FuncFlag>0</FuncFlag>
+                            </xml>";
+
+                    $time = time();
+                    $msgtype = 'text';
+                    $content = $str;
+                    $retStr = sprintf($textTpl, $fromusername, $tousername, $time, $msgtype, $content);
+                    echo $retStr;
+
+                }
+
+            }
+
             $time = time();
             $msgtype = 'text';
             $content = "欢迎来到微信公众号的开发世界！__GZPHP27";
 
-            // Return a formatted string
+            // // Return a formatted string
             $retStr = sprintf($textTpl, $fromusername, $tousername, $time, $msgtype, $content);
             echo $retStr;
 
@@ -287,5 +324,14 @@ https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID
             $_SESSION['expire_time'] = time();
             return $access_token;
         }
+    }
+
+
+    public function getWeather($city) 
+    {
+        $appkey = '64048e7fdd8d6699314d654306f55745';
+
+        $url = "http://v.juhe.cn/weather/index?format=2&cityname=".$city."&key=".$appkey;
+        return $this->$getData($url);
     }
 }

@@ -19,12 +19,12 @@ $arr = array(
             "sub_button" => array(
                 array(
                     "type" => "click",
-                    "name" => urlencode("今日歌曲"),
+                    "name" => urlencode("联系我们"),
                     "key" => "30000"
                 ),
                 array(
                     "type" => "click",
-                    "name" => urlencode("今日歌曲"),
+                    "name" => urlencode("在线帮助"),
                     "key" => "40000"
                 )
             )
