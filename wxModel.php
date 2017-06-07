@@ -1,6 +1,9 @@
 <?php
 class wxModel
 {
+
+    public $appid = "wxc059f3adb5938b6a";
+    public $appsecret = "ed6b5cb68e18390318df6c0c2f9dafbd";
     /*
      * 接口配置信息，此信息需要你有自己的服务器资源，填写的URL需要正确响应微信发送的Token验证*/
     public function valid()
@@ -124,7 +127,52 @@ EOT;
                     $retStr = sprintf($textTpl, $fromusername, $tousername, $time, $msgtype, $mediaid);
                     echo $retStr;
                 }
+
+                if (substr($keyword, 0, 6) == '天气') 
+                {
+
+                    $city = substr($keyword, 6, strlen($keyword));
+                    $str = $this->getWeather($city);
+                    $textTpl = "<xml>
+                            <ToUserName><![CDATA[%s]]></ToUserName>
+                            <FromUserName><![CDATA[%s]]></FromUserName>
+                            <CreateTime>%s</CreateTime>
+                            <MsgType><![CDATA[%s]]></MsgType>
+                            <Content><![CDATA[%s]]></Content>
+                            <FuncFlag>0</FuncFlag>
+                            </xml>";
+
+                    $time = time();
+                    $msgtype = 'text';
+                    $content = $str;
+                    $retStr = sprintf($textTpl, $fromusername, $tousername, $time, $msgtype, $content);
+                    
+                    echo ($retStr);
+
+                }
+
+
+                if ($keyword == '测试') {
+
+                    $textTpl = "<xml>
+                            <ToUserName><![CDATA[%s]]></ToUserName>
+                            <FromUserName><![CDATA[%s]]></FromUserName>
+                            <CreateTime>%s</CreateTime>
+                            <MsgType><![CDATA[%s]]></MsgType>
+                            <Content><![CDATA[%s]]></Content>
+                            <FuncFlag>0</FuncFlag>
+                            </xml>";
+                    $time = time();
+                    $msgtype = 'text';
+                    $content = '<a href="http://119.23.220.85/demo/wechat/demo.php">测试</a>';
+                    $retStr = sprintf($textTpl, $fromusername, $tousername, $time, $msgtype, $content);
+                    echo $retStr;
+                }
+
+
             }
+
+            
 
             // 判断是否发生了事件推送
             if ($msgtype == 'event') {
@@ -185,13 +233,31 @@ EOT;
                     echo $retStr;
                 }
 
+                if ($event == 'SCAN') {
+
+                    /*
+                    <xml><ToUserName><![CDATA[gh_44c4974a3e34]]></ToUserName>
+                    <FromUserName><![CDATA[oCKeexMw5Vy5qR4v650X05-MGyKY]]></FromUserName>
+                    <CreateTime>1496799219</CreateTime>
+                    <MsgType><![CDATA[event]]></MsgType>
+                    <Event><![CDATA[SCAN]]></Event>
+                    <EventKey><![CDATA[666]]></EventKey>
+                    <Ticket><![CDATA[gQEA8DwAAAAAAAAAAS5odHRwOi8vd2VpeGluLnFxLmNvbS9xLzAybDBtN3djOERldTQxcGZpMGhwMWMAAgTPVzdZAwSAOgkA]]></Ticket>
+                    </xml>
+                    */
+                    $key = $postObj->EventKey;
+
+                    if ($key == '666') {
+
+                        // echo "你扫描了某一张二维码";
+                    }
+                }
 
 
-                if (substr($keyword, 0, 6 ) =='天气') {
 
-                    $city = substr($keyword, 6, strlen($keyword));
-                    $str = $this->getWeather($city);
-                    $textTpl = "<xml>
+            }
+
+            $textTpl = "<xml>
                             <ToUserName><![CDATA[%s]]></ToUserName>
                             <FromUserName><![CDATA[%s]]></FromUserName>
                             <CreateTime>%s</CreateTime>
@@ -199,17 +265,6 @@ EOT;
                             <Content><![CDATA[%s]]></Content>
                             <FuncFlag>0</FuncFlag>
                             </xml>";
-
-                    $time = time();
-                    $msgtype = 'text';
-                    $content = $str;
-                    $retStr = sprintf($textTpl, $fromusername, $tousername, $time, $msgtype, $content);
-                    echo $retStr;
-
-                }
-
-            }
-
             $time = time();
             $msgtype = 'text';
             $content = "欢迎来到微信公众号的开发世界！__GZPHP27";
@@ -326,12 +381,56 @@ https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID
         }
     }
 
-
+    //城市
     public function getWeather($city) 
     {
         $appkey = '64048e7fdd8d6699314d654306f55745';
 
         $url = "http://v.juhe.cn/weather/index?format=2&cityname=".$city."&key=".$appkey;
-        return $this->$getData($url);
+        return $this->getData($url);
+    }
+    //获取用户Openid
+    public function getUserOpenIdList()
+    {
+
+        $url = "https://api.weixin.qq.com/cgi-bin/user/get?access_token=".$this->getAccessToken();
+        return $this->getData($url);
+
+    }
+    //设置网页授权(有问题)
+    public function getUserInfo()
+    {
+
+        $appid = $this->appid;
+
+        $redirect_uri = urlencode('http://119.23.220.85/demo/wechat/login.php');
+        $scope = 'snsapi_userinfo';
+
+        $url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=".$appid."&redirect_uri=".$redirect_uri."&response_type=code&scope=".$scope."&state=STATE#wechat_redirect ";
+        header('location:' . $url);
+    }
+
+
+
+
+
+
+
+
+    //生成临时二维码
+    public function getQrCode()
+    {
+
+        $url = "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=".$this->getAccessToken();
+        $postStr = '{"expire_seconds": 604800, "action_name": "QR_SCENE", "action_info": {"scene": {"scene_id": 666}}}';
+        $ret = $this->getData($url, 'POST', $postStr);
+        $arr = $this->jsonToArray($ret);
+        $ticket = $arr['ticket'];
+        // return $arr;
+
+        $imgUrl = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=".urlencode($ticket);
+
+        return $imgUrl;
+
     }
 }
